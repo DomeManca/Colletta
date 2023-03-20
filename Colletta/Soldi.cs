@@ -6,90 +6,40 @@ using System.Threading.Tasks;
 
 namespace Colletta
 {
-    public class Soldi
+    public class Soldi : IComparable<Soldi>
     {
-        private double _importo;
-        private string _valuta;
-        private static string[] valute = new string[] { "USD", "GBP", "EUR", "CHF", "CAD", "AUD", "NZD" };
-        private static List<string> _valuteAccettate = new List<string>(valute);
+        private string Id { get; set; }
+        public double Importo { get; set; }
+        public string Valuta { get; set; }
 
         public Soldi(double importo, string valuta)
         {
             Importo = importo;
+            Id = $"{Importo}-id";
             Valuta = valuta;
         }
 
-        /*properties*/
-        public double Importo
+        public override string ToString()
         {
-            get
-            {
-                return _importo;
-            }
-            set
-            {
-                if (value > 0)
-                {
-                    _importo = value;
-                }
-                else
-                {
-                    throw new Exception("Il campo \"Importo\" deve essere maggiore di 0");
-                }
-            }
-        }
-        public string Valuta
-        {
-            get
-            {
-                return _valuta;
-            }
-            set
-            {
-                //string[] valuteAccettate = new string[] { "EURO", "DOLLARI", "STERLINE" };
-                InserisciSeStringaValida(ref _valuta, value, "Valuta");
-            }
-        }
-        public static string[] ValuteAccettate
-        {
-            get
-            {
-                return _valuteAccettate.ToArray();
-            }
-        }
-        /*fine properties*/
-
-        public static double CambiaValuta(string valutaIniziale, string valutaFinale, double importo)
-        {
-            //USD, GBP, EUR, CHF, CAD, AUD, NZD
-            double[] cambioInEuro = new double[] { 0.94, 1.13, 1, 1.02, 0.68, 0.62, 0.58 };
-            double[] cambioDaEuro = new double[] { 1.06, 0.88, 1, 0.98, 1.47, 1.62, 1.73 };
-
-            if (!ValuteAccettate.Contains(valutaIniziale) || !ValuteAccettate.Contains(valutaFinale))
-            {
-                throw new Exception("Inserire valute accettabili");
-            }
-            else if (importo < 0)
-            {
-                throw new Exception("Inserire un importo valido");
-            }
-
-            double tmp = importo * cambioInEuro[_valuteAccettate.IndexOf(valutaIniziale)]; /*prima converto in euro per comodità*/
-            tmp *= cambioDaEuro[_valuteAccettate.IndexOf(valutaFinale)]; /*poi da euro a quello che serve*/
-
-            return tmp;
+            return $"ID: {Id} - IMPORTO: {Importo}{Valuta}";
         }
 
-        protected void InserisciSeStringaValida(ref string campo, string val, string perErrore)
+        public bool Equals(Soldi p)
         {
-            if (!String.IsNullOrWhiteSpace(val))
-            {
-                campo = val;
-            }
-            else
-            {
-                throw new Exception($"Inserire il campo \"{perErrore}\" valido");
-            }
+            if (p == null) return false;
+
+            if (this == p) return true;
+
+            return (this.Id == p.Id);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Id, Importo, Valuta).GetHashCode();
+        }
+        public int CompareTo(Soldi other)
+        {
+            return Importo.CompareTo(other.Importo);
         }
     }
 }

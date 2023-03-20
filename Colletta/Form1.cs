@@ -12,140 +12,158 @@ namespace Colletta
 {
     public partial class Form1 : Form
     {
-        Dictionary<Persona, Soldi> quote;
-        int newIndex = 0, selectedIndex = 0;
-        bool selected = false;
-        double totale = 0, totaleQuote = 0, deltaQuote = 0;
         public Form1()
         {
             InitializeComponent();
 
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox1.Items.AddRange(Soldi.ValuteAccettate);
-            comboBox2.Items.AddRange(Soldi.ValuteAccettate);
-            comboBox2.Text = comboBox1.Text = Soldi.ValuteAccettate[2];
-
-            dataGridView1.Columns.Add("Name", "NOME");
-            dataGridView1.Columns.Add("Surname", "COGNOME");
-            dataGridView1.Columns.Add("Amount", "IMPORTO");
-            dataGridView1.Columns.Add("Currency", "VALUTA");
-            for (int i = 0; i < dataGridView1.Columns.Count; i++)
-            {
-                dataGridView1.Columns[i].Width = (dataGridView1.Width * 22) / 100;
-            }
-
-            dataGridView1.ReadOnly = true;
-
-            butNewData.Enabled = false;
-            butDelete.Enabled = false;
-            comboBox1.Enabled = false;
-
-            quote = new Dictionary<Persona, Soldi>();
+            listView1.Columns.Add("Nome", 100);
+            listView1.Columns.Add("Saldo", 100);
         }
 
-        private void butNewUser_Click(object sender, EventArgs e)
-        { /*inserisci*/
-            if ((!String.IsNullOrWhiteSpace(textName.Text)) && (!String.IsNullOrWhiteSpace(textSurname.Text) && (!String.IsNullOrWhiteSpace(textPrice.Text)) && textPrice.Text.All(char.IsDigit)))
+        Dictionary<Persona, Soldi> collette = new Dictionary<Persona, Soldi>();
+        Persona temp;
+        Soldi tempino;
+
+        string[] alunni = new string[] { "Bassi", "Borelli", "Colombi", "Crotti", "Cutinella", "Ferrari", "Ghilardi A.", "Ghilardi N.", "Ghirardi", "Lin", "Manca", "Mensah", "Messi", "Mosconi", "Panseri", "Patelli", "Rossi", "Todeschini", "Verzeri", "Vita" };
+        double SaldoTot = 0;
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            for (int i = 0; i < alunni.Length; i++)
             {
+                temp = new Persona(alunni[i]);
+                tempino = new Soldi(0, "euri");
+                collette.Add(temp, tempino);
+            }
 
-                Persona p = new Persona(textName.Text, textSurname.Text);
-                Soldi s = new Soldi(float.Parse(textPrice.Text), comboBox1.Text);
+            listView1.Items.Clear();
+            listView1.View = View.Details;
+            listView1.FullRowSelect = true;
 
-                if (quote.ContainsKey(p) && selected == false)
-                { /*se è lo stesso nome già esistente ma la riga non è stata selezionata*/
-                    MessageBox.Show("Per modificare un valore selezionare la sua linea");
-                }
-                else
+            Reload_ListView();
+        }
+
+        public void Reload_ListView()
+        {
+            foreach (KeyValuePair<Persona, Soldi> kvp in collette)
+            {
+                string[] val = new string[] { Convert.ToString(kvp.Key.Nome), Convert.ToString(kvp.Value.Importo) };
+
+                ListViewItem item = new ListViewItem(val);
+                listView1.Items.Add(item);
+
+                label3.Text = $"Saldo totale: {SaldoTot}";
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)//aggiungi
+        {
+            if (!String.IsNullOrWhiteSpace(textBox1.Text) || !String.IsNullOrWhiteSpace(textBox2.Text))
+            {
+                try
                 {
-                    quote[p] = s;
-                    AddRow(textName.Text, textSurname.Text, textPrice.Text, comboBox1.Text);
-                    ChangeLabels();
-                    ClearTextBox();
-                    dataGridView1.ClearSelection();
-                    selected = false;
+                    double quota = double.Parse(textBox2.Text);
+                    bool ver = false;
+                    for (int i = 0; i < alunni.Length; i++)
+                        if (textBox1.Text == alunni[i])
+                            ver = true;
+
+                    if (ver)
+                    {
+                        temp = new Persona(textBox1.Text);
+                        tempino = collette[temp];
+                        double oldimp = tempino.Importo;
+                        tempino = new Soldi(oldimp + quota, "€");
+                        collette[temp] = tempino;
+                    }
+                    else
+                    {
+                        textBox1.Text = String.Empty;
+                        throw new Exception("Persona non Esistente");
+                    }
+
+                    SaldoTot += quota;
+                    listView1.Items.Clear();
+                    Reload_ListView();
+
+                    textBox1.Text = String.Empty;
+                    textBox2.Text = String.Empty;
+                }
+                catch
+                {
+                    textBox2.Text = String.Empty;
+                    throw new Exception("Quota non Valida");
                 }
             }
             else
-            {
-                MessageBox.Show("Inserire dei dati validi");
-            }
-
+                throw new Exception("Inserire Valori");
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        { /*tot da pagare*/
-            if (String.IsNullOrWhiteSpace(textBox1.Text) || (!textBox1.Text.All(char.IsDigit)))
+        private void button2_Click(object sender, EventArgs e)//togli
+        {
+            if (!String.IsNullOrWhiteSpace(textBox1.Text) || !String.IsNullOrWhiteSpace(textBox2.Text))
             {
-                butNewData.Enabled = false;
-                comboBox1.Enabled = false;
+                try
+                {
+                    double quota = double.Parse(textBox2.Text);
+                    bool ver = false;
+                    for (int i = 0; i < alunni.Length; i++)
+                        if (textBox1.Text == alunni[i])
+                            ver = true;
+
+                    if (ver)
+                    {
+                        temp = new Persona(textBox1.Text);
+                        tempino = collette[temp];
+                        double oldimp = tempino.Importo;
+
+                        if (oldimp >= quota)
+                        {
+                            tempino = new Soldi(tempino.Importo - quota, "€");
+                            collette[temp] = tempino;
+                        }
+                        else
+                            throw new Exception("Valore troppo alto");
+                    }
+                    else
+                    {
+                        textBox1.Text = String.Empty;
+                        throw new Exception("Persona non Esistente");
+                    }
+
+                    SaldoTot -= quota;
+                    listView1.Items.Clear();
+                    Reload_ListView();
+
+                    textBox1.Text = String.Empty;
+                    textBox2.Text = String.Empty;
+                }
+                catch
+                {
+                    textBox2.Text = String.Empty;
+                    throw new Exception("Quota non Valida");
+                }
             }
             else
-            {
-                butNewData.Enabled = true;
-                comboBox1.Enabled = true;
-                totale = float.Parse(textBox1.Text);
-            }
+                throw new Exception("Inserire Valori");
         }
 
-        private void butDelete_Click(object sender, EventArgs e)
-        {/*elimina*/
-            if (!dataGridView1.SelectedRows[0].IsNewRow && dataGridView1.SelectedRows.Count == 1)
-            {
-                Persona a = new Persona(dataGridView1.SelectedRows[0].Cells[0].Value.ToString(), dataGridView1.SelectedRows[0].Cells[1].Value.ToString());
-                MessageBox.Show($"[{a.Id}]");
-                quote.Remove(a);
-                dataGridView1.Rows.Remove(dataGridView1.SelectedRows[0]);
-
-                dataGridView1.ClearSelection();
-                ChangeLabels();
-                ClearTextBox();
-
-                butDelete.Enabled = false;
-            }
-        }
-
-        private void dataGridView1_RowHeaderMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void button3_Click(object sender, EventArgs e) //ordina per nome
         {
-            if (!dataGridView1.SelectedRows[0].IsNewRow)
-            {
-                butDelete.Enabled = true;
-                selected = true;
+            SortedDictionary<Persona, Soldi> temprino = new SortedDictionary<Persona, Soldi>(collette);
+            collette = new Dictionary<Persona, Soldi>(temprino);
 
-                selectedIndex = dataGridView1.SelectedRows[0].Index;
-
-                textName.Text = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
-                textSurname.Text = dataGridView1.SelectedRows[0].Cells[1].Value.ToString();
-                textPrice.Text = dataGridView1.SelectedRows[0].Cells[2].Value.ToString();
-            }
+            listView1.Items.Clear();
+            Reload_ListView();
         }
 
-        private void AddRow(params string[] listuccia)
+        private void button4_Click(object sender, EventArgs e) // ordina per importo
         {
-            if (!selected)
-            {
-                dataGridView1.Rows.Insert(newIndex, listuccia);
-                newIndex++;
-            }
-            else
-            { /*qui sot modificando un valore già esistente*/
-                dataGridView1.Rows[selectedIndex].SetValues(listuccia);
-            }
-        }
-        private void ChangeLabels()
-        {
-            totaleQuote = 0;
-            foreach (KeyValuePair<Persona, Soldi> kvp in quote)
-            {
-                totaleQuote += Soldi.CambiaValuta(kvp.Value.Valuta, comboBox2.Text, kvp.Value.Importo);
-            }
-            deltaQuote = totale - totaleQuote;
+            SortedDictionary<Persona, Soldi> temprino = new SortedDictionary<Persona, Soldi>(collette);
+            collette = new Dictionary<Persona, Soldi>(temprino);
 
-            labTot.Text = $"TOT:{totaleQuote} {comboBox2.Text}";
-            labDelta.Text = $"D: {deltaQuote}";
-        }
-        private void ClearTextBox()
-        {
-            textName.Text = textSurname.Text = textPrice.Text = String.Empty;
+            listView1.Items.Clear();
+            Reload_ListView();
         }
     }
 }

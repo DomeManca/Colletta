@@ -6,91 +6,44 @@ using System.Threading.Tasks;
 
 namespace Colletta
 {
-    public class Persona
+    public class Persona : IComparable<Persona>
     {
-        private string _nome, _cognome, _id;
+        private string Id { get; set; }
+        public string Nome { get; set; }
 
-        public Persona(string nome, string cognome)
-        {/*costruttore*/
+        public Persona(string nome)
+        {
             Nome = nome;
-            Cognome = cognome;
-            Id = $"{Nome};{Cognome};ID";
+            Id = $"{nome}-id";
         }
-        /*properties*/
-        public string Nome
-        {
-            get
-            {
-                return _nome;
-            }
-            set
-            {
-                InserisciSeStringaValida(ref _nome, value, "Nome");
-            }
-        }
-        public string Cognome
-        {
-            get
-            {
-                return _cognome;
-            }
-            set
-            {
-                InserisciSeStringaValida(ref _cognome, value, "Cognome");
-            }
-        }
-        public string Id
-        {
-            get
-            {
-                return _id;
-            }
-            set
-            {
-                InserisciSeStringaValida(ref _id, value, "Id");
-            }
-        }
-        /*fine properties*/
 
-        /*funzioni generali*/
         public override string ToString()
         {
-            return $"{Nome};{Cognome};{Id}";
+            return $"ID: {Id} - NOME: {Nome}";
         }
+
         public bool Equals(Persona p)
         {
-            if (p == null)
-            {
-                return false;
-            }
-            else if (p == this)
-            {
-                return true;
-            }
-            else
-            {
-                return (p.Id == this.Id);
-            }
+            if (p == null) return false;
+
+            if (this == p) return true;
+
+            return (this.Id == p.Id);
         }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as Persona);
         }
+
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            return (Id, Nome).GetHashCode();
         }
-        /*fine funzioni generali*/
-        protected void InserisciSeStringaValida(ref string campo, string val, string perErrore)
+
+        public int CompareTo(Persona other)
         {
-            if (!String.IsNullOrWhiteSpace(val))
-            {
-                campo = val;
-            }
-            else
-            {
-                throw new Exception($"Inserire il campo \"{perErrore}\" valido");
-            }
+            return Nome.CompareTo(other.Nome);
         }
     }
 }
