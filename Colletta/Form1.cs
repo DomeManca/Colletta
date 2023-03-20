@@ -22,18 +22,18 @@ namespace Colletta
 
         Dictionary<Persona, Soldi> collette = new Dictionary<Persona, Soldi>();
         Persona temp;
-        Soldi tempino;
+        Soldi temp2;
 
-        string[] alunni = new string[] { "Bassi", "Borelli", "Colombi", "Crotti", "Cutinella", "Ferrari", "Ghilardi A.", "Ghilardi N.", "Ghirardi", "Lin", "Manca", "Mensah", "Messi", "Mosconi", "Panseri", "Patelli", "Rossi", "Todeschini", "Verzeri", "Vita" };
+        string[] titolari = new string[] { "Meret","Di Lorenzo", "Rrahmani", "Kim", "Mario Rui" , "Anguissa", "Lobotka", "Zielinski" , "Lozano", "Osimhen", "Kvaratskhelia" };
         double SaldoTot = 0;
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            for (int i = 0; i < alunni.Length; i++)
+            for (int i = 0; i < titolari.Length; i++)
             {
-                temp = new Persona(alunni[i]);
-                tempino = new Soldi(0, "euri");
-                collette.Add(temp, tempino);
+                temp = new Persona(titolari[i]);
+                temp2 = new Soldi(0, "euro");
+                collette.Add(temp, temp2);
             }
 
             listView1.Items.Clear();
@@ -64,17 +64,17 @@ namespace Colletta
                 {
                     double quota = double.Parse(textBox2.Text);
                     bool ver = false;
-                    for (int i = 0; i < alunni.Length; i++)
-                        if (textBox1.Text == alunni[i])
+                    for (int i = 0; i < titolari.Length; i++)
+                        if (textBox1.Text == titolari[i])
                             ver = true;
 
                     if (ver)
                     {
                         temp = new Persona(textBox1.Text);
-                        tempino = collette[temp];
-                        double oldimp = tempino.Importo;
-                        tempino = new Soldi(oldimp + quota, "€");
-                        collette[temp] = tempino;
+                        temp2 = collette[temp];
+                        double oldimp = temp2.Importo;
+                        temp2 = new Soldi(oldimp + quota, "€");
+                        collette[temp] = temp2;
                     }
                     else
                     {
@@ -107,20 +107,20 @@ namespace Colletta
                 {
                     double quota = double.Parse(textBox2.Text);
                     bool ver = false;
-                    for (int i = 0; i < alunni.Length; i++)
-                        if (textBox1.Text == alunni[i])
+                    for (int i = 0; i < titolari.Length; i++)
+                        if (textBox1.Text == titolari[i])
                             ver = true;
 
                     if (ver)
                     {
                         temp = new Persona(textBox1.Text);
-                        tempino = collette[temp];
-                        double oldimp = tempino.Importo;
+                        temp2 = collette[temp];
+                        double oldimp = temp2.Importo;
 
                         if (oldimp >= quota)
                         {
-                            tempino = new Soldi(tempino.Importo - quota, "€");
-                            collette[temp] = tempino;
+                            temp2 = new Soldi(temp2.Importo - quota, "€");
+                            collette[temp] = temp2;
                         }
                         else
                             throw new Exception("Valore troppo alto");
